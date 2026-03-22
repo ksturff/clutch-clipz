@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ClutchClipz</title>
+
+<style>
+body {
+  margin: 0;
+  background: black;
+  font-family: Arial;
+  overflow: hidden;
+}
+
+.feed {
+  height: 100vh;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+}
+
+.video-container {
+  height: 100vh;
+  width: 100%;
+  position: relative;
+  scroll-snap-align: start;
+}
+
+video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.info {
+  position: absolute;
+  bottom: 20px;
+  left: 15px;
+  color: white;
+}
+
+.username {
+  font-weight: bold;
+}
+
+.caption {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.actions {
+  position: absolute;
+  right: 10px;
+  bottom: 100px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  color: white;
+}
+
+.action {
+  text-align: center;
+  cursor: pointer;
+}
+
+.icon {
+  font-size: 28px;
+}
+
+.game-tag {
+  position: absolute;
+  top: 20px;
+  left: 15px;
+  background: rgba(0,0,0,0.5);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 10px;
+}
+
+.upload-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #00ff88;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  font-size: 30px;
+  border: none;
+  cursor: pointer;
+}
+
+input {
+  display: none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="feed" id="feed"></div>
+
+<input type="file" id="upload" accept="video/*" />
+
+<button class="upload-btn" onclick="document.getElementById('upload').click()">+</button>
+
+<script>
+let videosData = [
+  {
+    user: "@player1",
+    caption: "Clean GTA getaway 🔥",
+    game: "GTA",
+    src: "https://www.w3schools.com/html/mov_bbb.mp4",
+    likes: 120,
+    comments: 20
+  },
+  {
+    user: "@player2",
+    caption: "Clutch 1v3 😤",
+    game: "Fortnite",
+    src: "https://www.w3schools.com/html/movie.mp4",
+    likes: 80,
+    comments: 10
+  }
+];
+
+const feed = document.getElementById("feed");
+
+function renderFeed() {
+  feed.innerHTML = "";
+
+  videosData.forEach((v, index) => {
+    const div = document.createElement("div");
+    div.className = "video-container";
+
+    div.innerHTML = `
+      <div class="game-tag">${v.game}</div>
+
+      <video src="${v.src}" muted loop></video>
+
+      <div class="info">
+        <div class="username">${v.user}</div>
+        <div class="caption">${v.caption}</div>
+      </div>
+
+      <div class="actions">
+        <div class="action" onclick="like(${index})">
+          <div class="icon">❤️</div>
+          <div>${v.likes}</div>
+        </div>
+        <div class="action">
+          <div class="icon">💬</div>
+          <div>${v.comments}</div>
+        </div>
+        <div class="action">
+          <div class="icon">🔁</div>
+          <div>Share</div>
+        </div>
+      </div>
+    `;
+
+    feed.appendChild(div);
+  });
+
+  setupVideoPlayback();
+}
+
+function like(index) {
+  videosData[index].likes++;
+  renderFeed();
+}
+
+function setupVideoPlayback() {
+  const videos = document.querySelectorAll("video");
+
+  function playVisible() {
+    videos.forEach(v => v.pause());
+
+    let center = window.innerHeight / 2;
+
+    videos.forEach(v => {
+      let rect = v.getBoundingClientRect();
+      if (rect.top < center && rect.bottom > center) {
+        v.play();
+      }
+    });
+  }
+
+  feed.addEventListener("scroll", playVisible);
+  playVisible();
+}
+
+// UPLOAD SYSTEM
+document.getElementById("upload").addEventListener("change", function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const url = URL.createObjectURL(file);
+
+  videosData.unshift({
+    user: "@you",
+    caption: "New clip 🔥",
+    game: "Your Game",
+    src: url,
+    likes: 0,
+    comments: 0
+  });
+
+  renderFeed();
+});
+
+// INITIAL LOAD
+renderFeed();
+</script>
+
+</body>
+</html>
